@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PaddleOCR Web UI — Extract text from images using state-of-the-art OCR powered by PaddlePaddle. Supports 80+ languages.">
-    <title>PaddleOCR — Intelligent Text Extraction</title>
+    <meta name="description" content="PaddleOCR Land Document Intelligence — Extract & Classify Indian Land Records (RoR, Sale Deed, Mutation, Bhu-Naksha Map).">
+    <title>PaddleOCR — Indian Land Document Intelligence</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='85'>🔍</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='85'>📜</text></svg>">
 </head>
 <body>
 
@@ -23,55 +23,48 @@
         <header class="hero">
             <div class="hero-badge">
                 <span class="dot"></span>
-                PaddleOCR Engine Active
+                PaddleOCR v4 &bull; Land Document Engine Active
             </div>
-            <h1>Intelligent Text Extraction</h1>
-            <p>Upload any image and let our AI-powered OCR engine extract every word with precision. Supports 80+ languages.</p>
+            <h1>Land Document Intelligence &amp; Generator</h1>
+            <p>Generate synthetic land records or upload official documents to extract structured schema fields automatically.</p>
         </header>
 
-        <!-- Controls -->
+        <!-- Mode Toggle Bar -->
         <div class="controls-bar">
+            <div class="mode-switch">
+                <button class="mode-btn active" id="mode-upload-btn">📤 Upload Document</button>
+                <button class="mode-btn" id="mode-generate-btn">🛠️ Synthetic Document Generator</button>
+            </div>
+
             <div class="control-group">
-                <label for="lang-select">🌐 Language</label>
+                <label for="lang-select">🌐 OCR Language</label>
                 <select id="lang-select" class="lang-select">
                     <option value="en" selected>English</option>
-                    <option value="ch">Chinese (Simplified)</option>
-                    <option value="chinese_cht">Chinese (Traditional)</option>
-                    <option value="japan">Japanese</option>
-                    <option value="korean">Korean</option>
                     <option value="hi">Hindi</option>
                     <option value="ta">Tamil</option>
                     <option value="te">Telugu</option>
                     <option value="mr">Marathi</option>
-                    <option value="ne">Nepali</option>
-                    <option value="fr">French</option>
-                    <option value="german">German</option>
-                    <option value="es">Spanish</option>
-                    <option value="it">Italian</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
-                    <option value="ar">Arabic</option>
-                    <option value="th">Thai</option>
+                    <option value="ch">Chinese</option>
                 </select>
             </div>
         </div>
 
-        <!-- Main Two-Column Layout -->
-        <div class="main-grid">
+        <!-- ================= SECTION 1: UPLOAD MODE ================= -->
+        <div id="section-upload" class="main-grid">
 
             <!-- Left Column: Upload -->
             <div class="glass-card">
                 <div class="card-header">
                     <div class="icon upload-icon">📤</div>
-                    <h2>Upload Image</h2>
+                    <h2>Upload Land Record</h2>
                 </div>
 
                 <div class="upload-zone" id="upload-zone">
                     <div class="upload-content">
                         <span class="upload-icon-large">🖼️</span>
-                        <h3>Drop your image here</h3>
+                        <h3>Drop land document here</h3>
                         <p>or <span class="browse-link">browse files</span></p>
-                        <p style="margin-top: 8px; font-size: 0.78rem; opacity: 0.5;">JPG, PNG, BMP, TIFF — Max 20MB</p>
+                        <p style="margin-top: 8px; font-size: 0.78rem; opacity: 0.5;">RoR, Sale Deed, Mutation Order, Cadastral Map — JPG, PNG, BMP</p>
                     </div>
                 </div>
 
@@ -83,52 +76,122 @@
                 </div>
 
                 <button class="ocr-btn" id="ocr-btn">
-                    <span id="ocr-btn-text">Extract Text</span>
+                    <span id="ocr-btn-text">Extract Document Intelligence</span>
                     <div class="spinner" id="ocr-btn-spinner"></div>
                 </button>
             </div>
 
-            <!-- Right Column: Results -->
+            <!-- Right Column: Results & Structured JSON -->
             <div class="glass-card results-panel">
                 <div class="card-header">
-                    <div class="icon result-icon">📝</div>
-                    <h2>Extracted Text</h2>
+                    <div class="icon result-icon">📜</div>
+                    <h2>Extracted Document Intelligence</h2>
+                </div>
+
+                <!-- Document Type Classification Badge -->
+                <div class="doc-badge-container" id="doc-badge-container">
+                    <div class="doc-badge" id="doc-badge">RECORD_OF_RIGHTS</div>
+                    <div class="doc-confidence" id="doc-confidence">100% Match</div>
                 </div>
 
                 <!-- Empty State -->
                 <div class="results-empty" id="results-empty">
                     <span class="empty-icon">🔍</span>
-                    <p>Upload an image and click <strong>Extract Text</strong> to see results here.</p>
+                    <p>Upload a land record or generate one using the generator to see <strong>Structured JSON &amp; OCR text</strong>.</p>
                 </div>
 
                 <!-- Annotated Image -->
                 <div class="annotated-image-container" id="annotated-container">
-                    <img id="annotated-img" alt="Image with detected text regions highlighted">
+                    <img id="annotated-img" alt="Document with detected text regions highlighted">
                 </div>
 
-                <!-- Stats -->
+                <!-- Stats Bar -->
                 <div class="stats-bar" id="stats-bar">
                     <div class="stat-card">
                         <div class="stat-value" id="stat-lines">0</div>
-                        <div class="stat-label">Lines Found</div>
+                        <div class="stat-label">Lines Detected</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="stat-avg-conf">0%</div>
-                        <div class="stat-label">Avg. Confidence</div>
+                        <div class="stat-value" id="stat-doc-type">UNKNOWN</div>
+                        <div class="stat-label">Doc Classification</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-time">0s</div>
-                        <div class="stat-label">Processing</div>
+                        <div class="stat-label">Processing Time</div>
                     </div>
                 </div>
 
-                <!-- Copy All Button -->
-                <button class="copy-all-btn" id="copy-all-btn">
-                    📋 Copy All Text
-                </button>
+                <!-- Result View Tabs -->
+                <div class="view-tabs" id="view-tabs">
+                    <button class="tab-btn active" id="tab-json-btn">🧩 Structured JSON Payload</button>
+                    <button class="tab-btn" id="tab-lines-btn">📝 Raw OCR Lines</button>
+                </div>
 
-                <!-- Text Results List -->
-                <div class="text-results" id="text-results"></div>
+                <!-- Tab 1: Structured JSON View -->
+                <div class="tab-content active" id="tab-json-content">
+                    <div class="json-actions">
+                        <button class="copy-all-btn" id="copy-json-btn">📋 Copy Structured JSON</button>
+                    </div>
+                    <pre class="json-viewer" id="json-viewer"></pre>
+                </div>
+
+                <!-- Tab 2: Raw Lines View -->
+                <div class="tab-content" id="tab-lines-content">
+                    <div class="json-actions">
+                        <button class="copy-all-btn" id="copy-text-btn">📋 Copy All Text</button>
+                    </div>
+                    <div class="text-results" id="text-results"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= SECTION 2: GENERATOR MODE ================= -->
+        <div id="section-generate" class="main-grid" style="display: none;">
+
+            <!-- Left: Config & Payload Editor -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="icon upload-icon">⚙️</div>
+                    <h2>Document Schema Generator</h2>
+                </div>
+
+                <div class="generator-controls">
+                    <label for="doc-type-select">Select Document Schema Standard:</label>
+                    <select id="doc-type-select" class="lang-select" style="width: 100%; margin-bottom: 16px;">
+                        <option value="RECORD_OF_RIGHTS">1. Record of Rights (RoR / Patta / 7/12 / Khatauni)</option>
+                        <option value="CONVEYANCE_DEED">2. Conveyance &amp; Transfer Deeds (Sale Deed)</option>
+                        <option value="MUTATION_ORDER">3. Mutation Register &amp; Orders (VF-6 / Dakhil-Kharij)</option>
+                        <option value="CADASTRAL_MAP">4. Spatial Cadastral Map (Bhu-Naksha / FMB)</option>
+                    </select>
+
+                    <label for="payload-editor">Input JSON Payload (Customizable):</label>
+                    <textarea id="payload-editor" class="payload-editor" rows="14"></textarea>
+
+                    <button class="ocr-btn visible" id="generate-btn" style="margin-top: 16px;">
+                        <span>🎨 Generate Official Document Image</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Preview & Run OCR -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="icon result-icon">🖼️</div>
+                    <h2>Generated Document Preview</h2>
+                </div>
+
+                <div class="generated-preview-container" id="generated-preview-container">
+                    <div class="results-empty" id="gen-empty">
+                        <span class="empty-icon">🎨</span>
+                        <p>Select a document type and click <strong>Generate Official Document Image</strong>.</p>
+                    </div>
+                    <img id="generated-doc-img" style="display: none; width: 100%; border-radius: 12px; border: 1px solid var(--clr-glass-border);" alt="Generated land record">
+                </div>
+
+                <button class="ocr-btn" id="run-gen-ocr-btn" style="margin-top: 16px; background: var(--grad-accent);">
+                    <span>⚡ Run PaddleOCR &amp; Extract Schema</span>
+                </button>
             </div>
 
         </div>
@@ -143,8 +206,8 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loader"></div>
-        <p>Running OCR Engine...</p>
-        <span class="loading-sub">This may take a few seconds on first run while models download</span>
+        <p id="loading-text">Running PaddleOCR Engine...</p>
+        <span class="loading-sub">Classifying document and extracting structured JSON fields</span>
     </div>
 
     <!-- Toast Notification -->
