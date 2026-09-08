@@ -35,3 +35,5 @@ Thumbs.db
 # Temp / Cache
 .pytest_cache/
 *.log
+frontend/
+
